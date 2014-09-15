@@ -1,0 +1,26 @@
+module pp
+
+imports
+
+	libstratego-gpp
+	lib/runtime/tmpl/pp
+
+rules
+	
+  pp-Markdown-string =
+    fail
+    ; !V([], <id>)
+    ; box2text-string(|120)
+      
+  pp-partial-Markdown-string =
+    fail
+    ; !V([], <id>)
+    ; box2text-string(|120)
+      
+  pp-debug :
+    ast -> result
+    with
+       result := <pp-Markdown-string> ast
+    <+ <bottomup(try(not(is-string); not(is-list); not(pp-Markdown-string); debug(!"cannot pp ")))> ast
+    ;  result := ""
+

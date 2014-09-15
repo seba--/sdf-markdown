@@ -1,0 +1,151 @@
+module Markdown
+
+
+context-free start-symbols
+  Start
+
+context-free syntax
+  Start.Document = SBlock*
+  SBlock = Block
+  SBlock = " " Block
+  SBlock = "  " Block
+  SBlock = "   " Block
+  Block = LeafBlock
+  Block = ContainerBlock
+
+%% 2 Preprocessing
+lexical syntax
+  LineEnd = [\n\r] 
+  LineEnd = EOF
+  EOF =
+  LineChar = ~[\n\r]
+  LineCharNoSpace = ~[\n\r\ ]
+  LineChars = LineChar*
+  LineCharsNoSpace1 = LineCharNoSpace LineChar*
+  LineChars1 = LineChar LineChar*
+  Line = LineChars LineEnd
+  NonblankLine = LineCharsNoSpace1 LineEnd
+  BlankLine = Spaces LineEnd
+
+lexical restrictions
+  EOF -/- ~[]
+
+lexical syntax
+  Space1 = ""
+  Space1 = " "
+  Space3 = "" 
+  Space3 = " " 
+  Space3 = "  "
+  Space3 = "   "
+  Spaces = " "*
+  Spaces1 = " "+
+  Space1-4 = " "
+  Space1-4 = "  "
+  Space1-4 = "   "
+  Space1-4 = "    "
+
+%% 4.1 Horizontal rules
+context-free syntax
+  LeafBlock = HR
+  HR.HRStar  = "*" Spaces "*" Spaces "*" Spaces LineEnd
+  HR.HRMinus = "-" Spaces "-" Spaces "-" Spaces LineEnd
+  HR.HRPlus  = "+" Spaces "+" Spaces "+" Spaces LineEnd
+
+%% 4.2 ATX ATXHeaders
+context-free syntax
+  LeafBlock = ATXHeader
+  ATXHeader.H1 = "#"      (" " InlineH ("#"+ Spaces)?)? LineEnd
+  ATXHeader.H2 = "##"     (" " InlineH ("#"+ Spaces)?)? LineEnd
+  ATXHeader.H3 = "###"    (" " InlineH ("#"+ Spaces)?)? LineEnd
+  ATXHeader.H4 = "####"   (" " InlineH ("#"+ Spaces)?)? LineEnd
+  ATXHeader.H5 = "#####"  (" " InlineH ("#"+ Spaces)?)? LineEnd
+  ATXHeader.H6 = "######" (" " InlineH ("#"+ Spaces)?)? LineEnd
+
+%% 4.3 Setext Headers
+context-free syntax
+  LeafBlock = SetextHeader {prefer}
+  SetextHeader.SetextHeader = ParagraphBegin SetextHeaderUnderline
+  SetextHeaderUnderline.H1 = "="+ Spaces LineEnd
+  SetextHeaderUnderline.H2 = "-"+ Spaces LineEnd
+
+%% 4.4 Indented code blocks
+context-free syntax
+  LeafBlock = IndentedCodeBlock
+  IndentedCodeBlock.IndentedCodeBlock = IndentedCodeChunk+ {longest-match}
+  IndentedCodeChunk.IndentedCodeChunk = BlankLine+ IndentedCodeChunkLine+ // TODO BlankLine+
+  IndentedCodeChunkLine.IndentedCodeChunkLine = "    " LineChars1 LineEnd
+
+%% 4.5 Fenced code blocks
+
+%% 4.6 HTML blocks
+
+%% 4.7 Link reference definitions
+
+%% 4.8 Paragraphs
+context-free syntax
+  LeafBlock = Paragraph
+  Paragraph.Paragraph = ParagraphBegin ParagraphContinuation* {longest-match}
+
+  ParagraphBegin = NonblankLine
+  ParagraphBegin = HR {reject}
+  ParagraphBegin = ATXHeader {reject}
+  ParagraphBegin = BlockQuoteElement {reject}
+  ParagraphBegin = ListItem {reject}
+
+  ParagraphContinuation = Spaces NonblankLine
+  ParagraphContinuation = HR {reject}
+  ParagraphContinuation = ATXHeader {reject}
+  ParagraphContinuation = BlockQuoteElement {reject}
+  
+%% 4.9 Blank lines
+context-free syntax
+  // TODO
+  // LeafBlock = BlankLine
+
+%% 5.1 Block quotes
+context-free syntax
+  ContainerBlock.BlockQuote = BlockQuoteElement+ {longest-match}
+  BlockQuoteElement.BQBasic = BlockQuoteMarker Block
+  // automatically handled by paragraph continuations
+  // BlockQuoteElement.BQLazy = BlockQuoteMarker ParagraphBegin ParagraphContinuation
+
+lexical syntax
+  BlockQuoteMarker = BlockQuoteMarkerNoSpace | "> "
+  BlockQuoteMarkerNoSpace = ">"
+
+lexical restrictions
+  BlockQuoteMarkerNoSpace -/- [\ ]
+
+%% 5.2 List items
+context-free syntax
+  ContainerBlock = ListItem
+  ListItem.Item = ListMarker Space1-4 ListBody {layout("3.first.col < 3.left.col")}
+  ListBody.Body = Block+
+
+  ListMarker.ListMarker = BulletListMarker
+  ListMarker = OrderedListMarker
+
+lexical syntax
+  BulletListMarker = [\-\+\*]
+  OrderedListMarker = [0-9]+ [\.\)]
+
+
+%% 6.11 Strings
+context-free syntax
+  Inline = String
+  InlineH = StringH
+  String = LineChars
+
+lexical syntax
+  StringH = Spaces
+  StringH = (~[\n\r]* ~[\\\r\n])? HashNoNonspace
+  StringH = ~[\n\r]* StringHEnd Spaces
+  StringHEnd = BackHash | BackNoHash | ~[\n\r\\\#\ ] 
+  BackHash = [\\][\#]
+  BackNoHash = "\\"
+  HashNoNonspace = "#" [\ ]+
+lexical restrictions
+  BackNoHash -/- [\#]
+  HashNoNonspace -/- [\ \n\r]
+  
+  

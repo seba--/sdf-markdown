@@ -1,0 +1,31 @@
+module Markdown.main
+
+imports
+  Markdown-Colorer
+  Markdown-Completions
+  Markdown-Folding
+  Markdown-Menus
+  Markdown-Refactorings
+  Markdown-References
+  Markdown-Syntax
+  Markdown-Views
+
+language General properties
+  
+  name:          Markdown
+  id:            Markdown
+  extends:       Root
+  
+  description:   "Spoofax-generated editor for the Markdown language"
+  url:           http://strategoxt.org
+  
+  extensions:    md
+  table:         include/Markdown.tbl
+  start symbols: Start
+  
+  provider:      include/markdown.ctree
+  provider:      include/markdown-java.jar
+  
+  observer:      editor-analyze (multifile)
+  
+  on save:       editor-save

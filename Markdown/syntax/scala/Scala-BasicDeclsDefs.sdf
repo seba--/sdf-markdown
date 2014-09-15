@@ -1,0 +1,58 @@
+
+module Scala-BasicDeclsDefs
+imports Scala-ClassesObjects Scala-Expressions Scala-Identifiers Scala-Types
+
+exports
+  context-free syntax
+    ":" Type                                                                              -> Typed            {cons("Typed")}
+    ":" ParamType                                                                         -> ParamTyped       {cons("ParamTyped")}
+    PatVarDef                                                                             -> Def              
+    TmplDef                                                                               -> Def              
+    "val" ValDcl                                                                          -> Dcl              {cons("ValDclDcl")}
+    {Id ","}+ ":" Type                                                                    -> ValDcl           {cons("ValDcl")}
+    "val" PatDef                                                                          -> PatVarDef        {cons("ValPatDef")}
+    {Pattern2 ","}+ Typed? "=" Expr                                                       -> PatDef           {cons("PatDef")}
+    "var" VarDcl                                                                          -> Dcl              {cons("VarDclDcl")}
+    "var" VarDef                                                                          -> PatVarDef        {cons("VarPatDef")}
+    {Id ","}+ ":" Type                                                                    -> VarDcl           {cons("VarDcl")}
+    PatDef                                                                                -> VarDef           
+    {Id ","}+ ":" Type "=" "_"                                                            -> VarDef           {cons("WildcardVarDef"), prefer}
+    "type" TypeDcl                                                                        -> Dcl              {cons("TypeDclDcl")}
+    Id TypeParamClause? LowerBoundType? UpperBoundType?                                   -> TypeDcl          {cons("TypeDcl")}
+    "type" TypeDef                                                                        -> Def              {cons("TypeDefDef")}
+    Id TypeParamClause? "=" Type                                                          -> TypeDef          {cons("TypeDef")}
+    "[" {VariantTypeParam ","}+ "]"                                                       -> TypeParamClause  {cons("TypeParamClause")}
+    Annotation* TypeParam                                                                 -> VariantTypeParam {cons("VariantTypeParam")}
+    Annotation* "+" TypeParam                                                             -> VariantTypeParam {cons("PlusVariantTypeParam")}
+    Annotation* "-" TypeParam                                                             -> VariantTypeParam {cons("NegVariantTypeParam")}
+    Id TypeParamClause? LowerBoundType? UpperBoundType? TypeViewBound* TypeContextBound*  -> TypeParam        {cons("TypeParam")}
+    "_" TypeParamClause? LowerBoundType? UpperBoundType? TypeViewBound* TypeContextBound* -> TypeParam        {cons("WildcardTypeParam")}
+    ">:" Type                                                                             -> LowerBoundType   {cons("LowerBoundType")}
+    "<:" Type                                                                             -> UpperBoundType   {cons("UpperBoundType")}
+    "<%" Type                                                                             -> TypeViewBound    {cons("TypeViewBound")}
+    ":" Type                                                                              -> TypeContextBound {cons("TypeContextBound")}
+    "def" FunDcl                                                                          -> Dcl              {cons("FunDclDcl")}
+    FunSig ":" Type                                                                       -> FunDcl           {cons("FunDcl")}
+    "def" FunDef                                                                          -> Def              {cons("FunDefDef")}
+    FunSig Typed? "=" Expr                                                                -> FunDef           {cons("FunDef")}
+    Id TypeParamClause? ParamClauses?                                                     -> FunSig           {cons("FunSig"), layout("3.first.line - 1.last.line < num(2)")}
+    ParamClause                                                                           -> ParamClauses     
+    "(" "implicit" {Param ","}+ ")"                                                       -> ParamClauses     {cons("ImplicitParamClause")}
+    ParamClause ParamClauses                                                              -> ParamClauses     {cons("ParamClauses"), layout("2.first.line - 1.last.line < num(2)")}
+    "(" {Param ","}* ")"                                                                  -> ParamClause      {cons("ParamClause")}
+    Annotation* Id ParamTyped? Assignment?                                                -> Param            {cons("Param")}
+    Type                                                                                  -> ParamType        
+    "=>" Type                                                                             -> ParamType        {cons("ByNameParam")}
+    Type "*"                                                                              -> ParamType        {cons("RepeatedParam")}
+    FunSig                                                                                -> FunDcl           {cons("ProcDcl")}
+    FunSig "{" Block "}"                                                                  -> FunDef           {cons("ProcDef"), layout("2.first.line - 1.last.line < num(2)")}
+    "import" {ImportExpr ","}+                                                            -> Import           {cons("Import")}
+    StableId                                                                              -> ImportExpr       {cons("ImportExpr")}
+    StableId "." "_"                                                                      -> ImportExpr       {cons("WildcardImportExpr")}
+    StableId "." ImportSelectors                                                          -> ImportExpr       {cons("SelectorsImportExpr")}
+    "{" {ImportSelector ","}+ "}"                                                         -> ImportSelectors  {cons("ImportSelectors")}
+    "{" {ImportSelector ","}+ "," "_" "}"                                                 -> ImportSelectors  {cons("ImportSelectorsWithWildcard")}
+    "{" "_" "}"                                                                           -> ImportSelectors  {cons("OnlyWildcardImportSelectors")}
+    Id                                                                                    -> ImportSelector   {cons("ImportSelector")}
+    Id "=>" Id                                                                            -> ImportSelector   {cons("MappedImportSelector")}
+    Id "=>" "_"                                                                           -> ImportSelector   {cons("WildcardImportSelector")}

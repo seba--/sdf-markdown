@@ -1,0 +1,41 @@
+module Scala-PatternMatching
+imports Scala-Literals Scala-Types
+
+exports
+  lexical syntax
+    PlainId -> InfixPatternOp 
+    "|"     -> InfixPatternOp {reject}
+
+  context-free priorities
+    { "_" -> SimplePattern {cons("WildcardPattern")}
+      Literal -> SimplePattern {cons("LiteralPattern")}
+      StableId -> SimplePattern
+      StableId "(" Patterns ")" -> SimplePattern {cons("ConstructorPattern")}
+      "(" Patterns ")" -> SimplePattern {cons("TuplePattern")}
+      StableId "(" ( Patterns "," )? ( VarPlainId "@" )? "_" "*" ")" ->
+      SimplePattern {cons("PatternSequence")} } >
+    { Pattern3 InfixPatternOp Pattern3 -> Pattern3
+      {cons("InfixPattern"), left, layout("1.last.line == 2.first.line && 3.first.line - 2.last.line < num(2)")}
+      SimplePattern -> Pattern3 } >
+    { VarPlainId "@" Pattern3 -> Pattern2 {cons("PatternBinder")}
+      Pattern3 -> Pattern2 } >
+    { VarPlainId ":" Type -> Pattern1 {cons("TypedPattern")}
+      "_" ":" Type -> Pattern1 {cons("WildcardTypedPattern")}
+      Pattern2 -> Pattern1 } >
+    { Pattern1 -> Pattern {longest-match}
+      Pattern "|" Pattern -> Pattern {cons("DisjunctPattern"), left} }
+
+  context-free syntax
+    "_"                                                            -> SimplePattern {cons("WildcardPattern")}
+    Literal                                                        -> SimplePattern {cons("LiteralPattern")}
+    StableId "(" Patterns ")"                                      -> SimplePattern {cons("ConstructorPattern")}
+    "(" Patterns ")"                                               -> SimplePattern {cons("TuplePattern")}
+    StableId "(" ( Patterns "," )? ( VarPlainId "@" )? "_" "*" ")" -> SimplePattern {cons("PatternSequence")}
+    Pattern3 InfixPatternOp Pattern3                               -> Pattern3      {cons("InfixPattern"), left, layout("1.last.line == 2.first.line && 3.first.line - 2.last.line < num(2)")}
+    VarPlainId "@" Pattern3                                        -> Pattern2      {cons("PatternBinder")}
+    VarPlainId ":" Type                                            -> Pattern1      {cons("TypedPattern")}
+    "_" ":" Type                                                   -> Pattern1      {cons("WildcardTypedPattern")}
+    Pattern "|" Pattern                                            -> Pattern       {cons("DisjunctPattern"), left}
+
+  context-free syntax
+    {Pattern ","}* -> Patterns {cons("Patterns")}

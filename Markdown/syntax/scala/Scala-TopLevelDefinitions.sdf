@@ -1,0 +1,22 @@
+
+module Scala-TopLevelDefinitions
+imports Scala-BasicDeclsDefs Scala-ClassesObjects Scala-Identifiers
+        Scala-Whitespace
+
+exports
+  context-free syntax
+                                          -> CompilationUnit        {cons("EmptyCompilationUnit")}
+    PackageDeclarationSemi* TopStatSemi+  -> CompilationUnit        {cons("CompilationUnit")}
+    TopStat SEMI                          -> TopStatSemi            {cons("TopStatSemi")}
+    TopStat EOL                           -> TopStatSemi            {cons("TopStatSemi"), enforce-newline, longest-match, prefer}
+    TopStat EOF                           -> TopStatSemi            {cons("TopStatSemi"), longest-match}
+    TopStat EOB                           -> TopStatSemi            {cons("TopStatSemi"), longest-match, avoid}
+    AnnotationSeq? Modifier* TmplDef      -> TopStat                {cons("TopTmplDef")}
+    Import                                -> TopStat                
+    Packaging                             -> TopStat                
+    PackageObject                         -> TopStat                
+    "package" QualId EOL                  -> PackageDeclarationSemi {cons("PackageDeclaration"), enforce-newline}
+    "package" QualId SEMI                 -> PackageDeclarationSemi {cons("PackageDeclaration")}
+    {Id "."}+                             -> QualId                 {cons("QualId")}
+    "package" QualId "{" TopStatSemi+ "}" -> Packaging              {cons("Packaging"), layout("3.first.line - 2.last.line < num(2)")}
+    "package" "object" ObjectDef          -> PackageObject          {cons("PackageObject")}

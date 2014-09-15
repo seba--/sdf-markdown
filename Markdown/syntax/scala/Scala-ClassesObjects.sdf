@@ -1,0 +1,69 @@
+
+module Scala-ClassesObjects
+imports Scala-BasicDeclsDefs Scala-Expressions Scala-Identifiers Scala-Types
+        Scala-Whitespace
+
+exports
+  context-free syntax
+    EarlyDefs? ClassParents TemplateBody?                                          -> ClassTemplate     {cons("ClassTemplate")}
+    EarlyDefs? TraitParents TemplateBody?                                          -> TraitTemplate     {cons("TraitTemplate")}
+    Constr WithAnnotType*                                                          -> ClassParents      {cons("ClassParents")}
+    AnnotType WithAnnotType*                                                       -> TraitParents      {cons("TraitParents")}
+    "with" AnnotType                                                               -> WithAnnotType     {cons("WithAnnotType")}
+    Id Typed? "=>"                                                                 -> SelfType          {cons("SelfType")}
+    "this" ":" Type "=>"                                                           -> SelfType          {cons("ThisSelfType")}
+    "_" ":" Type "=>"                                                              -> SelfType          {cons("WildcardSelfType")}
+    "{" SelfType TemplateStatSemi* "}"                                             -> TemplateBody      {cons("SelfTypeTemplateBody"), prefer}
+    "{" TemplateStatSemi* "}"                                                      -> TemplateBody      {cons("TemplateBody")}
+    AnnotType ArgumentExprsSeq?                                                    -> Constr            {cons("Constr")}
+    "{" EarlyDefSemi* "}" "with"                                                   -> EarlyDefs         {cons("EarlyDefs")}
+    EarlyDef SEMI                                                                  -> EarlyDefSemi      {cons("EarlyDefSemi"), longest-match}
+    EarlyDef EOL                                                                   -> EarlyDefSemi      {cons("EarlyDefSemi"), enforce-newline, longest-match, prefer}
+    EarlyDef EOB                                                                   -> EarlyDefSemi      {cons("EarlyDefSemi"), longest-match, avoid}
+    AnnotationSeq? Modifier* PatVarDef                                             -> EarlyDef          {cons("EarlyDef")}
+    LocalModifier                                                                  -> Modifier          
+    AccessModifier                                                                 -> Modifier          
+    "override"                                                                     -> Modifier          {cons("OverrideModifier")}
+    "abstract"                                                                     -> LocalModifier     {cons("AbstractModifier")}
+    "final"                                                                        -> LocalModifier     {cons("FinalModifier")}
+    "sealed"                                                                       -> LocalModifier     {cons("SealedModifier")}
+    "implicit"                                                                     -> LocalModifier     {cons("ImplicitModifier")}
+    "lazy"                                                                         -> LocalModifier     {cons("LazyModifier")}
+    "private" AccessQualifier?                                                     -> AccessModifier    {cons("PrivateModifier")}
+    "protected" AccessQualifier?                                                   -> AccessModifier    {cons("ProtectedModifier")}
+    "[" Id "]"                                                                     -> AccessQualifier   {cons("AccessQualifier")}
+    "[" "this" "]"                                                                 -> AccessQualifier   {cons("ThisQualifier")}
+    "class" ClassDef                                                               -> TmplDef           {cons("Class")}
+    Morphism ConstrAnnotation* AccessModifier? ClassParamClauses? ClassTemplateOpt -> ClassDef          {cons("ClassDef"), layout("4.first.line - 1.last.line < num(2)")}
+    Id                                                                             -> Morphism          
+    Id TypeParamClause                                                             -> Morphism          {cons("Polymorph")}
+    ClassParamClause                                                               -> ClassParamClauses 
+    "(" "implicit" {ClassParam ","}+ ")"                                           -> ClassParamClauses {cons("ImplicitClassParamClause"), prefer}
+    ClassParamClause ClassParamClauses                                             -> ClassParamClauses {cons("ClassParamClauses"), layout("2.first.line - 1.last.line < num(2)")}
+    "(" {ClassParam ","}* ")"                                                      -> ClassParamClause  {cons("ClassParamClause")}
+    Annotation* Id ":" ParamType Assignment?                                       -> ClassParam        {cons("ClassParam")}
+    Annotation* Modifier* "val" Id ":" ParamType Assignment?                       -> ClassParam        {cons("ValClassParam")}
+    Annotation* Modifier* "var" Id ":" ParamType Assignment?                       -> ClassParam        {cons("VarClassParam")}
+    "extends" ClassTemplate                                                        -> ClassTemplateOpt  {cons("ClassClassTemplateOpt")}
+    "extends" TemplateBody                                                         -> ClassTemplateOpt  {cons("TemplateClassTemplateOpt")}
+    TemplateBody                                                                   -> ClassTemplateOpt  
+                                                                                   -> ClassTemplateOpt  {cons("EmptyClassTemplateOpt")}
+    "this" ParamClauses "=" ConstrExpr                                             -> FunDef            {cons("ThisExprFunDef")}
+    "this" ParamClauses ConstrBlock                                                -> FunDef            {cons("ThisBlockFunDef"), layout("3.first.line - 2.last.line < num(2)")}
+    "this" ArgumentExprsSeq                                                        -> SelfInvocation    {cons("SelfInvocation")}
+    "this" BlockExpr                                                               -> SelfInvocation    {cons("BlockSelfInvocation"), layout("2.first.line - 1.last.line < num(2)")}
+    SelfInvocation                                                                 -> ConstrExpr        
+    ConstrBlock                                                                    -> ConstrExpr        
+    "{" SelfInvocation ";" BlockStatSemi* "}"                                      -> ConstrBlock       {cons("ConstrBlock")}
+    "{" SelfInvocation "}"                                                         -> ConstrBlock       {cons("ConstrBlock")}
+    "{" SelfInvocation BlockStatSemi+ "}"                                          -> ConstrBlock       {cons("ConstrBlock"), layout("3.first.line - 2.last.line > num(0)")}
+    "case" "class" ClassDef                                                        -> TmplDef           {cons("CaseClass")}
+    "trait" TraitDef                                                               -> TmplDef           {cons("Trait")}
+    Id TypeParamClause? TraitTemplateOpt                                           -> TraitDef          {cons("TraitDef")}
+    "extends" TraitTemplate                                                        -> TraitTemplateOpt  {cons("TraitTraitTemplateOpt")}
+    "extends" TemplateBody                                                         -> TraitTemplateOpt  {cons("TemplateTraitTemplateOpt")}
+    TemplateBody                                                                   -> TraitTemplateOpt  
+                                                                                   -> TraitTemplateOpt  {cons("EmptyTraitTemplateOpt")}
+    "case" "object" ObjectDef                                                      -> TmplDef           {cons("CaseObject")}
+    "object" ObjectDef                                                             -> TmplDef           {cons("Object")}
+    Id ClassTemplateOpt                                                            -> ObjectDef         {cons("ObjectDef")}

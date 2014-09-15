@@ -1,0 +1,13 @@
+module editor/Markdown-Outliner
+
+imports
+  
+  include/Markdown
+  lib/runtime/editor/outline-library
+  lib/runtime/editor/origins
+  // editor/Markdown-Outliner.generated
+
+rules
+  
+  to-outline-label = fail
+  

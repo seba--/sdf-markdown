@@ -1,0 +1,126 @@
+module Markdown
+exports
+  context-free start-symbols
+    Start
+
+  context-free syntax
+    SBlock*        -> Start  {cons("Document")}
+    Block          -> SBlock 
+    " " Block      -> SBlock 
+    "  " Block     -> SBlock 
+    "   " Block    -> SBlock 
+    LeafBlock      -> Block  
+    ContainerBlock -> Block  
+
+  lexical syntax
+    [\n\r]                    -> LineEnd           
+    EOF                       -> LineEnd           
+                              -> EOF               
+    ~[\n\r]                   -> LineChar          
+    ~[\n\r\ ]                 -> LineCharNoSpace   
+    LineChar*                 -> LineChars         
+    LineCharNoSpace LineChar* -> LineCharsNoSpace1 
+    LineChar LineChar*        -> LineChars1        
+    LineChars LineEnd         -> Line              
+    LineCharsNoSpace1 LineEnd -> NonblankLine      
+    Spaces LineEnd            -> BlankLine         
+
+  lexical restrictions
+    EOF -/- ~[]
+
+  lexical syntax
+    ""     -> Space1   
+    " "    -> Space1   
+    ""     -> Space3   
+    " "    -> Space3   
+    "  "   -> Space3   
+    "   "  -> Space3   
+    " "*   -> Spaces   
+    " "+   -> Spaces1  
+    " "    -> Space1-4 
+    "  "   -> Space1-4 
+    "   "  -> Space1-4 
+    "    " -> Space1-4 
+
+  context-free syntax
+    HR                                       -> LeafBlock 
+    "*" Spaces "*" Spaces "*" Spaces LineEnd -> HR        {cons("HRStar")}
+    "-" Spaces "-" Spaces "-" Spaces LineEnd -> HR        {cons("HRMinus")}
+    "+" Spaces "+" Spaces "+" Spaces LineEnd -> HR        {cons("HRPlus")}
+
+  context-free syntax
+    ATXHeader                                          -> LeafBlock 
+    "#" ( " " InlineH ( "#"+ Spaces )? )? LineEnd      -> ATXHeader {cons("H1")}
+    "##" ( " " InlineH ( "#"+ Spaces )? )? LineEnd     -> ATXHeader {cons("H2")}
+    "###" ( " " InlineH ( "#"+ Spaces )? )? LineEnd    -> ATXHeader {cons("H3")}
+    "####" ( " " InlineH ( "#"+ Spaces )? )? LineEnd   -> ATXHeader {cons("H4")}
+    "#####" ( " " InlineH ( "#"+ Spaces )? )? LineEnd  -> ATXHeader {cons("H5")}
+    "######" ( " " InlineH ( "#"+ Spaces )? )? LineEnd -> ATXHeader {cons("H6")}
+
+  context-free syntax
+    SetextHeader                         -> LeafBlock             {prefer}
+    ParagraphBegin SetextHeaderUnderline -> SetextHeader          {cons("SetextHeader")}
+    "="+ Spaces LineEnd                  -> SetextHeaderUnderline {cons("H1")}
+    "-"+ Spaces LineEnd                  -> SetextHeaderUnderline {cons("H2")}
+
+  context-free syntax
+    IndentedCodeBlock                 -> LeafBlock             
+    IndentedCodeChunk+                -> IndentedCodeBlock     {cons("IndentedCodeBlock"), longest-match}
+    BlankLine+ IndentedCodeChunkLine+ -> IndentedCodeChunk     {cons("IndentedCodeChunk")}
+    "    " LineChars1 LineEnd         -> IndentedCodeChunkLine {cons("IndentedCodeChunkLine")}
+
+  context-free syntax
+    Paragraph                             -> LeafBlock             
+    ParagraphBegin ParagraphContinuation* -> Paragraph             {cons("Paragraph"), longest-match}
+    NonblankLine                          -> ParagraphBegin        
+    HR                                    -> ParagraphBegin        {reject}
+    ATXHeader                             -> ParagraphBegin        {reject}
+    BlockQuoteElement                     -> ParagraphBegin        {reject}
+    ListItem                              -> ParagraphBegin        {reject}
+    Spaces NonblankLine                   -> ParagraphContinuation 
+    HR                                    -> ParagraphContinuation {reject}
+    ATXHeader                             -> ParagraphContinuation {reject}
+    BlockQuoteElement                     -> ParagraphContinuation {reject}
+
+  context-free syntax
+    
+
+  context-free syntax
+    BlockQuoteElement+     -> ContainerBlock    {cons("BlockQuote"), longest-match}
+    BlockQuoteMarker Block -> BlockQuoteElement {cons("BQBasic")}
+
+  lexical syntax
+    BlockQuoteMarkerNoSpace | "> " -> BlockQuoteMarker        
+    ">"                            -> BlockQuoteMarkerNoSpace 
+
+  lexical restrictions
+    BlockQuoteMarkerNoSpace -/- [\ ]
+
+  context-free syntax
+    ListItem                     -> ContainerBlock 
+    ListMarker Space1-4 ListBody -> ListItem       {cons("Item"), layout("3.first.col < 3.left.col")}
+    Block+                       -> ListBody       {cons("Body")}
+    BulletListMarker             -> ListMarker     {cons("ListMarker")}
+    OrderedListMarker            -> ListMarker     
+
+  lexical syntax
+    [\-\+\*]      -> BulletListMarker  
+    [0-9]+ [\.\)] -> OrderedListMarker 
+
+  context-free syntax
+    String    -> Inline  
+    StringH   -> InlineH 
+    LineChars -> String  
+
+  lexical syntax
+    Spaces                                 -> StringH        
+    ( ~[\n\r]* ~[\\\r\n] )? HashNoNonspace -> StringH        
+    ~[\n\r]* StringHEnd Spaces             -> StringH        
+    BackHash | BackNoHash | ~[\n\r\\\#\ ]  -> StringHEnd     
+    [\\] [\#]                              -> BackHash       
+    "\\"                                   -> BackNoHash     
+    "#" [\ ]+                              -> HashNoNonspace 
+
+  lexical restrictions
+    BackNoHash -/- [\#]
+    HashNoNonspace -/- [\ \n\r]

@@ -1,0 +1,154 @@
+module Markdown.pp.generated
+
+strategies
+  prettyprint-LineEnd =
+    ![S(<is-string>)]
+
+  prettyprint-EOF =
+    ![S(<is-string>)]
+
+  prettyprint-LineChar =
+    ![S(<is-string>)]
+
+  prettyprint-LineCharNoSpace =
+    ![S(<is-string>)]
+
+  prettyprint-LineChars =
+    ![S(<is-string>)]
+
+  prettyprint-LineCharsNoSpace1 =
+    ![S(<is-string>)]
+
+  prettyprint-LineChars1 =
+    ![S(<is-string>)]
+
+  prettyprint-Line =
+    ![S(<is-string>)]
+
+  prettyprint-NonblankLine =
+    ![S(<is-string>)]
+
+  prettyprint-BlankLine =
+    ![S(<is-string>)]
+
+  prettyprint-example =
+    prettyprint-LineEnd
+
+  prettyprint-example =
+    prettyprint-EOF
+
+  prettyprint-example =
+    prettyprint-LineChar
+
+  prettyprint-example =
+    prettyprint-LineCharNoSpace
+
+  prettyprint-example =
+    prettyprint-LineChars
+
+  prettyprint-example =
+    prettyprint-LineCharsNoSpace1
+
+  prettyprint-example =
+    prettyprint-LineChars1
+
+  prettyprint-example =
+    prettyprint-Line
+
+  prettyprint-example =
+    prettyprint-NonblankLine
+
+  prettyprint-example =
+    prettyprint-BlankLine
+
+
+strategies
+  prettyprint-Space1 =
+    ![S(<is-string>)]
+
+  prettyprint-Space3 =
+    ![S(<is-string>)]
+
+  prettyprint-Spaces =
+    ![S(<is-string>)]
+
+  prettyprint-Spaces1 =
+    ![S(<is-string>)]
+
+  prettyprint-Space1-4 =
+    ![S(<is-string>)]
+
+  prettyprint-example =
+    prettyprint-Space1
+
+  prettyprint-example =
+    prettyprint-Space3
+
+  prettyprint-example =
+    prettyprint-Spaces
+
+  prettyprint-example =
+    prettyprint-Spaces1
+
+  prettyprint-example =
+    prettyprint-Space1-4
+
+
+strategies
+  prettyprint-BlockQuoteMarker =
+    ![S(<is-string>)]
+
+  prettyprint-BlockQuoteMarkerNoSpace =
+    ![S(<is-string>)]
+
+  prettyprint-example =
+    prettyprint-BlockQuoteMarker
+
+  prettyprint-example =
+    prettyprint-BlockQuoteMarkerNoSpace
+
+
+strategies
+  prettyprint-BulletListMarker =
+    ![S(<is-string>)]
+
+  prettyprint-OrderedListMarker =
+    ![S(<is-string>)]
+
+  prettyprint-example =
+    prettyprint-BulletListMarker
+
+  prettyprint-example =
+    prettyprint-OrderedListMarker
+
+
+strategies
+  prettyprint-StringH =
+    ![S(<is-string>)]
+
+  prettyprint-StringHEnd =
+    ![S(<is-string>)]
+
+  prettyprint-BackHash =
+    ![S(<is-string>)]
+
+  prettyprint-BackNoHash =
+    ![S(<is-string>)]
+
+  prettyprint-HashNoNonspace =
+    ![S(<is-string>)]
+
+  prettyprint-example =
+    prettyprint-StringH
+
+  prettyprint-example =
+    prettyprint-StringHEnd
+
+  prettyprint-example =
+    prettyprint-BackHash
+
+  prettyprint-example =
+    prettyprint-BackNoHash
+
+  prettyprint-example =
+    prettyprint-HashNoNonspace

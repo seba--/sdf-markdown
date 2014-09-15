@@ -1,0 +1,60 @@
+
+module Scala-Types
+imports Scala-Annotations Scala-BasicDeclsDefs Scala-Identifiers
+        Scala-Whitespace
+
+exports
+  context-free syntax
+    Id                                  -> Path           {prefer}
+    {PathElem "."}+                     -> Path           {cons("Path")}
+    PlainId                             -> PathElem       
+    "this"                              -> PathElem       {cons("This")}
+    "super" ClassQualifier? "." PlainId -> PathElem       {cons("Super")}
+    PlainId                             -> StableIdElem   
+    "this"                              -> StableIdElem   {cons("StableThis")}
+    "super" ClassQualifier?             -> StableIdElem   {cons("StableSuper")}
+    Id                                  -> StableId       
+    {StableIdElem "."}+ "." PlainId     -> StableId       {cons("StableId")}
+    "[" PlainId "]"                     -> ClassQualifier {cons("ClassQualifier")}
+    Prefix                              -> Path           {reject}
+
+  context-free restrictions
+    StableId -/- [\.] . [\33-\126] / [\{\,\_]
+
+  context-free syntax
+    Path "." "type"                       -> SimpleType         {cons("SingletonType")}
+    SimpleType "#" Id                     -> SimpleType         {cons("TypeProjection")}
+    StableId                              -> SimpleType         {cons("Type")}
+    SimpleType TypeArgs                   -> SimpleType         {cons("ParameterizedType")}
+    "[" {Type ","}+ "]"                   -> TypeArgs           {cons("TypeArgs")}
+    "(" {Type ","}+ ")"                   -> SimpleType         {cons("TupleType")}
+    SimpleType                            -> AnnotType          
+    SimpleType Annotation+                -> AnnotType          {cons("AnnotType"), layout("1.last.line == 2.first.line")}
+    AnnotType                             -> CompoundType       
+    Refinement                            -> CompoundType       
+    AnnotType Refinement                  -> CompoundType       {cons("RefinedType")}
+    AnnotType With+ Refinement?           -> CompoundType       {cons("CompoundType"), layout("3.first.line - 2.last.line < num(2)")}
+    "with" AnnotType                      -> With               {cons("With")}
+    "{" RefineStatSemi* "}"               -> Refinement         {cons("Refinement")}
+    RefineStat SEMI                       -> RefineStatSemi     {cons("RefineStatSemi"), longest-match}
+    RefineStat EOL                        -> RefineStatSemi     {cons("RefineStatSemi"), enforce-newline, longest-match, prefer}
+    RefineStat EOB                        -> RefineStatSemi     {cons("RefineStatSemi"), longest-match, avoid}
+    Dcl                                   -> RefineStat         
+    "type" TypeDef                        -> RefineStat         {cons("TypeRefineStat")}
+    InfixType                             -> Type               
+    CompoundType                          -> InfixType          
+    InfixType PlainId InfixType           -> InfixType          {cons("InfixType"), left, layout("3.first.line - 2.last.line < num(2)")}
+    FunctionArgTypes "=>" Type            -> Type               {cons("FunctionType"), prefer}
+    InfixType                             -> FunctionArgTypes   
+    "(" {ParamType ","}* ")"              -> FunctionArgTypes   {cons("FunctionArgType"), prefer}
+    InfixType ExistentialClause           -> Type               {cons("ExistentialType")}
+    "forSome" "{" ExistentialDclSemi+ "}" -> ExistentialClause  {cons("ExistentialClause")}
+    ExistentialDcl SEMI                   -> ExistentialDclSemi {cons("ExistentialDclSemi"), longest-match}
+    ExistentialDcl EOL                    -> ExistentialDclSemi {cons("ExistentialDclSemi"), enforce-newline, longest-match, prefer}
+    ExistentialDcl EOB                    -> ExistentialDclSemi {cons("ExistentialDclSemi"), longest-match}
+    "type" TypeDcl                        -> ExistentialDcl     {cons("ExistentialType")}
+    "val" ValDcl                          -> ExistentialDcl     {cons("ExistentialVal")}
+    "_" TypeBounds?                       -> SimpleType         {cons("WildcardType"), avoid}
+    ">:" Type                             -> TypeBounds         {cons("LowerTypeBound")}
+    "<:" Type                             -> TypeBounds         {cons("UpperTypeBound")}
+    ">:" Type "<:" Type                   -> TypeBounds         {cons("LowerAndUpperTypeBound")}

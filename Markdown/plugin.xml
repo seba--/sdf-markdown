@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+   <extension
+         point="org.eclipse.imp.runtime.languageDescription">
+      <language
+            extensions="md"
+            description="Markdown"
+            language="Markdown"
+            derivedFrom="DynamicRoot"
+            validator="Markdown.MarkdownValidator"
+            validatorClass="Markdown.MarkdownValidator"
+      ></language>
+   </extension>
+   <extension
+         id="Markdown.parser"
+         name="Markdown Parser"
+         point="org.eclipse.imp.runtime.parser">
+      <parser
+            class="Markdown.MarkdownParseController"
+            language="Markdown">
+      </parser>
+   </extension>    
+</plugin>

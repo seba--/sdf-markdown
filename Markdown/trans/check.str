@@ -1,0 +1,9 @@
+module check
+
+imports
+
+	include/Markdown
+	lib/editor-common.generated
+
+rules
+	
